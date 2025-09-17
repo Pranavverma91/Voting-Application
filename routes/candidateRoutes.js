@@ -116,7 +116,7 @@ router.post('/vote/:candidateID', jwtAuthMiddleware, async (req, res) => {
 })
 
 router.get("/vote/count", async (req, res) => {
-    try{
+    try {
     const candidate = await Candidate.find().sort({ voteCount: "desc" });
     const voteRecord = candidate.map((data) => {
         return {
@@ -125,7 +125,7 @@ router.get("/vote/count", async (req, res) => {
         }
     })
     return res.status(200).json(voteRecord);
-    }catch(error) {
+    } catch(error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
 }
