@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
-// Define the Person schema
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -51,7 +50,6 @@ userSchema.pre("save", async function(next){
 
     if(!person.isModified("password")) return next();
     try{
-      
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(person.password, salt);
     
@@ -70,6 +68,7 @@ userSchema.methods.comparePassword = async function(candidatePassword){
         throw err;
     }
 }
+
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;

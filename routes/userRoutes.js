@@ -2,10 +2,20 @@ const express = require("express");
 const router = express.Router();
 const User = require("./../models/user");
 const { jwtAuthMiddleware, generateToken } = require("./../jwt");
+const { raw }= require("body-parser");
+const bcrypt = require("bcrypt");
 
 router.post("/signup", async (req, res) => {
     try {
-        const data = req.body;
+        const data = {
+            name: req.body.name,
+            age: req.body.age,
+            mobile: req.body.mobile,
+            email: req.body.email,
+            address: req.body.address,
+            aadharCardNumber: req.body.aadharCardNumber,
+            password: req.body.password
+        }
         console.log(data);
         const newUser = new User(data);
 
@@ -29,14 +39,16 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     try {
-        const { aadharCardNumber, dateOfBirth } = req.body;
+        const { aadharCardNumber, password } = req.body;
         const userData = await User.findOne({ aadharCardNumber: aadharCardNumber });
-
-        if (!userData || !(await userData.comparePassword(dateOfBirth))) {
-            return res.status(401).json({ error: "Invalid aadharCardNumber or dateOfBirth"});
+        
+        if (!userData || !(await userData.comparePassword(password))) {
+            return res.status(401).json({ error: "Invalid aadharCardNumber or password"});
         }
+        
         const payload = {
-            id: userData.id
+            id: userData.id,
+            role: userData.role 
         }
         const token = generateToken(payload);
         res.json((token));
@@ -58,22 +70,22 @@ router.get("profile", jwtAuthMiddleware, async (req, res) => {
     }
 });
 
-router.put("/profile/dateOfBirth ",jwtAuthMiddleware, async (req, res) => {
+router.put("/profile/password ", jwtAuthMiddleware, async (req, res) => {
     try {
         const userId = req.user;
-        const {currentDateOfBirth, newDateOfBirth} = req.body;
+        const { currentpassword, newpassword } = req.body;
 
         const user = await user.findById(userId);
-        
-        if (!(await user.comparePassword(currentPassword))) {
-            return res.status(401).json({ error: `Invalid ${currentDateOfBirth}` });
+
+        if (!(await user.comparePassword(currentpassword))) {
+            return res.status(401).json({ error: `Invalid ${currentpassword}` });
         }
-        
-        user.password = newDateOfBirth;
+
+        user.password = newpassword;
         await user.save();
 
-        console.log("DateOfBirth Updated");
-        res.status(200).json({message: "DateOfBirth Updated"});
+        console.log("Password Updated");
+        res.status(200).json({ message: "Password Updated" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
